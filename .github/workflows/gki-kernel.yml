@@ -92,14 +92,15 @@ jobs:
             echo "UPLOAD=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup kernel source
+      - name: Setup evo source
         run: |
           echo "Free space:"
           df -h
           cd $GITHUB_WORKSPACE
           sudo apt-get install repo -y
-          mkdir android-kernel && cd android-kernel
-          repo init --u https://github.com/Dahlabanteng/kernel-manifest -b udc
+          mkdir evo && cd evo
+          repo init -u https://github.com/Evolution-X/manifest -b udc
+          git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests
           REMOTE_BRANCH=$(git ls-remote https://github.com/Dahlabanteng/kernel-manifest ${{ inputs.tag }})
           DEFAULT_MANIFEST_PATH=.repo/manifests/default.xml
           if grep -q deprecated <<< $REMOTE_BRANCH; then
@@ -111,50 +112,48 @@ jobs:
           repo --trace sync -c -j$(nproc --all) --no-tags
           df -h
 
-      - name: Setup KernelSU
-        env:
-          PATCH_PATH: ${{ inputs.patch_path }}
-          IS_DEBUG_KERNEL: ${{ inputs.debug }}
+      - name: aplikasion patchead
         run: |
-          cd $GITHUB_WORKSPACE/android-kernel
-          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+          patches/apply-patches.sh . trebledroid
+          
+      - name: adpting for evolution
+        run: | 
+          cd device/phh/treble
+          bash generate.sh evo
 
       - name: Setup ccache
-        if: inputs.use_cache == true
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: gki-kernel-aarch64-${{ inputs.version_name }}
-          max-size: 2G
-          save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: | 
+         export USE_CCACHE=1
+         export CCACHE_COMPRESS=1
+         export CCACHE_MAXSIZE=50G # 50 GB
 
       - name: Make working directory clean to avoid dirty
-        working-directory: android-kernel
+        working-directory: evo
         run: |
-          rm common/android/abi_gki_protected_exports_* || echo "No protected exports!"
           git config --global user.email "bot@kernelsu.org"
           git config --global user.name "KernelSUBot"
-          cd common/ && git add -A && git commit -a -m "Add KernelSU"
           repo status
 
-      - name: Build boot.img
-        working-directory: android-kernel
+      - name: Build gsi
+        working-directory: evo
         run: |
-          if [ ! -z ${{ vars.EXPECTED_SIZE }} ] && [ ! -z ${{ vars.EXPECTED_HASH }} ]; then
-            export KSU_EXPECTED_SIZE=${{ vars.EXPECTED_SIZE }}
-            export KSU_EXPECTED_HASH=${{ vars.EXPECTED_HASH }}
-          fi
-          if [ -e build/build.sh ]; then
-            LTO=thin BUILD_CONFIG=build.config build/build.sh CC="/usr/bin/ccache clang"
-          else
-            tools/bazel run --disk_cache=/home/runner/.cache/bazel --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
-          fi
+         source build/envsetup.sh
+         ccache -M 50G -F 0
+         lunch treble_arm64_bgN-userdebug 
+         make systemimage -j$(nproc --all)
+         
+      - name: Compresion
+        run: | 
+         cd $GITHUB_WORKSPACE/evo/out/target/product/tdgsi_arm64_ab
+         xz -9 -T0 -v -z system.img 
+         cd $GITHUB_WORKSPACE/evo
 
       - name: Prepare artifacts
         id: prepareArtifacts
         run: |
-          OUTDIR=android-kernel/out/android12-5.10/dist
+          OUTDIR=out/target/product/tdgsi_arm64_ab
           if [ ! -e $OUTDIR ]; then
-            OUTDIR=android-kernel/out/android12-5.10/dist
+            OUTDIR=out/target/product/tdgsi_arm64_ab
           fi
           mkdir output
           cp $OUTDIR/* ./output/
