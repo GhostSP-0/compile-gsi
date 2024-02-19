@@ -120,18 +120,13 @@ jobs:
           echo "Free space:"
           df -h
           cd $GITHUB_WORKSPACE
-          mkdir -p ~/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-          chmod a+x ~/bin/repo
-          cd $GITHUB_WORKSPACE
+          sudo apt install repo
           mkdir rom && cd rom
           git config --global user.email "bot@kernelsu.org"
           git config --global user.name "KernelSUBot"
           repo init -u https://github.com/LineageOS/android.git -b lineage-21.0
           git clone https://github.com/phhusson/treble_manifest .repo/local_manifests -b android-12.0
-          repo --version
-          repo sync -c -j6 --force-sync --no-tags --no-clone-bundle
-          df -h
+          repo sync -c -j6 --force-sync --no-tags
 
       - name: patch
         run: |
