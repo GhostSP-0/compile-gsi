@@ -91,11 +91,6 @@ jobs:
           else
             echo "UPLOAD=false" >> $GITHUB_OUTPUT
           fi
-      - name: install repo
-        run: | 
-          mkdir -p ~/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-          chmod a+x ~/bin/repo
       
       - name: install SDK
         run: | 
@@ -124,6 +119,10 @@ jobs:
         run: |
           echo "Free space:"
           df -h
+          cd $GITHUB_WORKSPACE
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
           cd $GITHUB_WORKSPACE
           mkdir rom && cd rom
           git config --global user.email "bot@kernelsu.org"
