@@ -29,7 +29,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Pages
-        uses: actions/configure-pages@v4
         run: | 
          echo "Free space:"
          cd $GITHUB_WORKSPACE
@@ -62,7 +61,6 @@ jobs:
           git config --global user.name "KernelSUBot"
           repo status
       - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
         working-directory: evo
         run: |
          source build/envsetup.sh
