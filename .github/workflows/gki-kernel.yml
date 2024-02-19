@@ -102,7 +102,7 @@ jobs:
 
       - name: install conpile
         run: | 
-         passwd - root
+         passwd -d root
          su - root
          chmod o+w /root
          chmod +x /var/lib/dpkg/lock-frontend
