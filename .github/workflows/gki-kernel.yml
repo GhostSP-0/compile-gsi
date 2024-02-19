@@ -98,6 +98,12 @@ jobs:
            distribution: 'zulu'
            java-version: '8'
 
+      - name: install sdk
+        run: | 
+         if [ -d "$GITHUB_WORKSPACE/platform-tools" ] ; then
+           PATH="$GITHUB_WORKSPACE/platform-tools:$PATH"
+         fi
+
       - name: install conpile
         run: | 
          sudo apt install bc bison build-essential curl flex openjdk-8-jdk g++-multilib gcc-multilib git gnupg gperf libxml2 \
