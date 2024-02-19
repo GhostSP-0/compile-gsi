@@ -91,16 +91,7 @@ jobs:
           else
             echo "UPLOAD=false" >> $GITHUB_OUTPUT
           fi
-      
-      - name: install SDK
-        run: | 
-         cd $GITHUB_WORKSPACE
-         wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
-         unzip platform-tools-latest-linux.zip
-         if [ -d "$HOME/platform-tools" ] ; then 
-            PATH="$HOME/platform-tools:$PATH"
-         fi
-
+  
       - name: install open jdk 8
         uses: actions/setup-java@v3
         with:
@@ -109,7 +100,7 @@ jobs:
 
       - name: install conpile
         run: | 
-         sudo apt install bc bison build-essential curl flex g++-multilib gcc-multilib git gnupg gperf libxml2 \
+         sudo apt install bc bison build-essential curl flex openjdk-8-jdk g++-multilib gcc-multilib git gnupg gperf libxml2 \
          lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev imagemagick git \
          lunzip lzop schedtool squashfs-tools xsltproc zip zlib1g-dev python-is-python3 perl  \
          xmlstarlet virtualenv xz-utils rr jq libncurses5 pngcrush lib32ncurses5-dev git-lfs libxml2 \
