@@ -50,10 +50,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
-         run: | 
-          echo "Free space:"
           
       - name: Build with Jekyll
+      run: | 
+          echo "Free space:"
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./
