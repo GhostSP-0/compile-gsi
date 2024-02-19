@@ -113,22 +113,20 @@ jobs:
           cd $GITHUB_WORKSPACE
           sudo apt install repo
           mkdir rom && cd rom
-          repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs
-          git clone https://github.com/phhusson/treble_manifest .repo/local_manifests -b android-12.0
-          DEFAULT_MANIFEST_PATH=.repo/manifests/default.xml
-          if grep -q deprecated <<< $REMOTE_BRANCH; then
-            echo "Found deprecated branch: ${{ inputs.tag }}"
-            sed -i 's/"${{ inputs.tag }}"/"deprecated\/${{ inputs.tag }}"/g' $DEFAULT_MANIFEST_PATH
-            cat $DEFAULT_MANIFEST_PATH
-           fi
-          repo sync
+          repo init -u https://github.com/Evolution-X/manifest -b udc
+          git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-      - name: patch
+      - name: Apply the patches
         run: |
           cd $GITHUB_WORKSPACE/rom
-          git clone https://github.com/phhusson/treble_experimentations/releases/latest/download/patches-for-developers.zip
-          unzip patches-for-developers.zip
-          git am patch
+          patches/apply-patches.sh . trebledroid
+
+      - name: Adapting for Evolution-X
+        run: | 
+         cd device/phh/treble
+         bash generate.sh evo
+         cd $GITHUB_WORKSPACE/rom
           
       - name: Setup ccache
         if: inputs.use_cache == true
@@ -139,7 +137,7 @@ jobs:
           save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Make working directory clean to avoid dirty
-        working-directory: android-kernel
+        working-directory: rom
         run: |
           rm common/android/abi_gki_protected_exports_* || echo "No protected exports!"
           git config --global user.email "bot@kernelsu.org"
@@ -150,21 +148,28 @@ jobs:
       - name: Build gsi
         working-directory: rom
         run: |
-          .build/envsetup.sh
-           lunch treble_arm64_avN-userdebug
-           WITHOUT_CHECK_API=true make -j$(nproc) systemimage
+          source build/envsetup.sh
+          ccache -M 50G -F 0
+          lunch treble_arm64_bgN-userdebug 
+          make systemimage -j$(nproc --all)
+
+      - name: Compression
+        run: | 
+         cd out/target/product/tdgsi_arm64_ab
+         xz -9 -T0 -v -z system.img 
+          
       - name: Prepare artifacts
         id: prepareArtifacts
         run: |
-          OUTDIR=rom/out/target/product
+          OUTDIR=rom/out/target/product/tdgsi_arm64_ab
           if [ ! -e $OUTDIR ]; then
-            OUTDIR=rom/out/target/product
+            OUTDIR=rom/out/target/product/tdgsi_arm64_ab
           fi
           mkdir output
-          cp $OUTDIR/* ./output/
+          cp $OUTDIR/system.img  ./output/
           git clone https://github.com/Kernel-SU/AnyKernel3
           rm -rf ./AnyKernel3/*
-          cp $OUTDIR/* ./AnyKernel3/
+          cp $OUTDIR/system.img  ./AnyKernel3/
 
       - name: Upload Image and Image.gz
         uses: actions/upload-artifact@v4
