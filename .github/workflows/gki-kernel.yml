@@ -102,6 +102,7 @@ jobs:
 
       - name: install conpile
         run: | 
+         su - root
          chmod o+w /root
          chmod +x /var/lib/dpkg/lock-frontend
          apt install bc bison build-essential curl flex g++-multilib gcc-multilib git gnupg gperf libxml2 \
