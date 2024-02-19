@@ -131,7 +131,7 @@ jobs:
             sed -i 's/"${{ inputs.tag }}"/"deprecated\/${{ inputs.tag }}"/g' $DEFAULT_MANIFEST_PATH
             cat $DEFAULT_MANIFEST_PATH
            fi
-          repo sync -c -j6 --force-sync --no-tags --no-clone-bundle
+          repo sync
 
       - name: patch
         run: |
