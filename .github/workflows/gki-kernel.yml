@@ -94,7 +94,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           sudo apt-get install repo -y
           mkdir android-kernel && cd android-kernel
-          repo init --u repo init -u https://github.com/Evolution-X/manifest -b udc
+          repo init --u https://github.com/Evolution-X/manifest -b udc
           git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests
           repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
           df -h
