@@ -111,8 +111,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           sudo apt install repo
           mkdir rom && cd rom
-          repo init -u https://github.com/Evolution-X/manifest -b udc
-          git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests
+          sudo repo init -u https://github.com/Evolution-X/manifest -b udc
+          sudo git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests
           if grep -q deprecated <<< $REMOTE_BRANCH; then
             echo "Found deprecated branch: ${{ inputs.tag }}"
             sed -i 's/"${{ inputs.tag }}"/"deprecated\/${{ inputs.tag }}"/g' $DEFAULT_MANIFEST_PATH
