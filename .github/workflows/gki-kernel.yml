@@ -113,7 +113,13 @@ jobs:
           mkdir rom && cd rom
           repo init -u https://github.com/Evolution-X/manifest -b udc
           git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests
+          if grep -q deprecated <<< $REMOTE_BRANCH; then
+            echo "Found deprecated branch: ${{ inputs.tag }}"
+            sed -i 's/"${{ inputs.tag }}"/"deprecated\/${{ inputs.tag }}"/g' $DEFAULT_MANIFEST_PATH
+            cat $DEFAULT_MANIFEST_PATH
+          fi
           repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+          df -h
 
       - name: Apply the patches
         run: |
