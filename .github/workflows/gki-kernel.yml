@@ -69,8 +69,29 @@ jobs:
       CCACHE_HARDLINK: "true"
     steps:
 
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@v1.3.1
+      name: Free Disk Space (Ubuntu)
+on: push
+
+jobs:
+  free-disk-space:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
+        tool-cache: false
+        
+        # all of these default to true, but feel free to set to
+        # "false" if necessary for your workflow
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
 
       - name: update & upgrade
         run: | 
@@ -115,8 +136,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           sudo apt install repo
           mkdir rom && cd rom
-          sudo repo init -u https://github.com/Evolution-X/manifest -b udc
-          sudo git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests   
+          repo init -u https://github.com/Evolution-X/manifest -b udc
+          git clone https://github.com/ahnet-69/treble_manifest.git -b evo-udc .repo/local_manifests   
           repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
           df -h
 
